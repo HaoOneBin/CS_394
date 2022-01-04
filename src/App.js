@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
+
+const url = "https://courses.cs.northwestern.edu/394/data/cs-courses.php";
 
 const schedule = {
   title: "CS Courses for 2018-2019",
@@ -54,11 +56,30 @@ const Course = ({ course }) => (
   </div>
 );
 
-const App = () => (
-  <div className="container">
-    <Banner title={schedule.title} />
-    <CourseList courses={schedule.courses} />
-  </div>
-);
+const App = () => {
+  const [schedule, setSchedule] = useState();
+
+  // If no argument is given, React runs the function on all updates.
+  // If an empty list is given, then React runs the function only when
+  // the component is first added. That's what we want here:
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw response;
+      const json = await response.json();
+      setSchedule(json);
+    };
+    fetchSchedule();
+  }, []);
+
+  if (!schedule) return <h1>Loading schedule...</h1>;
+
+  return (
+    <div className="container">
+      <Banner title={schedule.title} />
+      <CourseList courses={schedule.courses} />
+    </div>
+  );
+};
 
 export default App;
